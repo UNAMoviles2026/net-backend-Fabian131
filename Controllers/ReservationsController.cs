@@ -61,4 +61,23 @@ public class ReservationsController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetByDate([FromQuery] string? date)
+    {
+        if (string.IsNullOrWhiteSpace(date))
+        {
+            return BadRequest(new { message = "The 'date' query parameter is missing or empty. Please provide a date." });
+        }
+
+        if (!DateOnly.TryParse(date, out var parsedDate))
+        {
+            return BadRequest(new { message = "Invalid date format. Please use a valid format like 'YYYY-MM-DD' (e.g., 2026-03-21)." });
+        }
+
+        var reservations = await _reservationService.GetByDateAsync(parsedDate);
+
+        // Returning the array directly to comply with the YAML contract specification.
+        return Ok(reservations);
+    }
 }
